@@ -13,13 +13,7 @@
 
 $menuEntries = Array(
 	Array(
-		'text' => 'TPLink - Configuration',
-		'type' => 'output',
-		'page' => 'plugin_setup.php',
-		'wrap' => 1
-	),
-	Array(
-		'text' => 'TPLink - About',
+		'text' => 'Button Queue - About',
 		'type' => 'help',
 		'page' => 'about.php',
 		'wrap' => 1

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# fpp-plugin-tplink install script
+# fpp-plugin-buttonqueue install script
 
 BASEDIR=$(dirname $0)
 cd $BASEDIR

@@ -1,1 +1,1 @@
-TPLink Plugin Help Page Placeholder
+Button Queue Plugin Help Page Placeholder

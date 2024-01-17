@@ -8,7 +8,7 @@ import json
 import subprocess
 
 class Logger(object):
-    def __init__(self, filename="/home/fpp/media/logs/fpp-plugin-tplink.log"):
+    def __init__(self, filename="/home/fpp/media/logs/fpp-plugin-buttonqueue.log"):
         self.terminal = sys.stdout
         self.log = open(filename, "a")
 
@@ -16,9 +16,9 @@ class Logger(object):
         self.terminal.write(message)
         self.log.write(message)
 
-sys.stdout = Logger("/home/fpp/media/logs/fpp-plugin-tplink.log")
+sys.stdout = Logger("/home/fpp/media/logs/fpp-plugin-buttonqueue.log")
 
-parser = argparse.ArgumentParser(description='tplink Plugin')
+parser = argparse.ArgumentParser(description='buttonqueue Plugin')
 parser.add_argument('-l','--list', help='Plugin Actions',action='store_true')
 args = parser.parse_args()
 

@@ -13,7 +13,7 @@ function returnIfExists($json, $setting) {
 function convertAndGetSettings() {
     global $settings;
         
-    $cfgFile = $settings['configDirectory'] . "/plugin.tplink.json";
+    $cfgFile = $settings['configDirectory'] . "/plugin.buttonqueue.json";
     if (file_exists($cfgFile)) {
         $j = file_get_contents($cfgFile);
         $json = json_decode($j, true);
