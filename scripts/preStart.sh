@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "Running fpp-plugin-tplink PreStart Script"
+echo "Running fpp-plugin-buttonqueue PreStart Script"
 
 BASEDIR=$(dirname $0)
 cd $BASEDIR

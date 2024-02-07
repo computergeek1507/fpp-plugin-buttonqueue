@@ -43,10 +43,12 @@
 
 class ButtonQueuePlugin : public FPPPlugin, public httpserver::http_resource {
 private:
-    std::vector<std::string> _fseqQueue;
+    std::vector<int> _seqIdxQueue;
     std::string _currentFSEQ;
     std::string _currentAction;
     std::string _queuePlaylist;
+    std::string _currentPlaylist;
+    int _lastItem {-1};
     //Json::Value config;
 
 public:
@@ -65,20 +67,20 @@ public:
     class ButtonQueueAddSequenceCommand : public Command {
     public:
         ButtonQueueAddSequenceCommand(ButtonQueuePlugin *p) : Command("ButtonQueue Add Sequence"), plugin(p) {
-            args.push_back(CommandArg("effect", "string", "FSEQ Name").setContentListUrl("api/sequence"));
-            args.push_back(CommandArg("duplicate", "bool", "Allow Duplicate Sequence").setDefaultValue("false"));
+            args.push_back(CommandArg("index", "int", "seq index").setDefaultValue("0"));
+            args.push_back(CommandArg("duplicate", "bool", "Allow Duplicate Sequence").setRange(0, 255).setDefaultValue("false"));
         }
         
         virtual std::unique_ptr<Command::Result> run(const std::vector<std::string> &args) override {
-            std::string FSEQName;
+            int seq_index = 0;
             bool duplicate = false;
             if (args.size() >= 1) {
-                FSEQName = args[0];
+                seq_index = std::stoi(args[0]);
             }
             if (args.size() >= 2) {
                 duplicate = args[1]=="true";
             }
-            plugin->AddSeqToQueue(FSEQName, duplicate);
+            plugin->AddSeqToQueue(seq_index, duplicate);
             return std::make_unique<Command::Result>("ButtonQueue Add Sequence");
         }
         ButtonQueuePlugin *plugin;
@@ -103,7 +105,21 @@ public:
         if (settings["Start"] == "PlaylistStart" && action == "start") {
             //EnableButtonQueueItems();
         }
+        _currentPlaylist = playlist["name"].asString();
         _currentAction = action;
+        if(!_seqIdxQueue.empty()) {
+            if(_lastItem != item && _currentPlaylist != _queuePlaylist) {
+               // $url = "http://127.0.0.1/api/command/Insert%20Playlist%20Immediate/" . $remotePlaylistEncoded . "/" . $index . "/" . $index;
+                std::vector<std::string> keywords;
+                keywords.push_back(_queuePlaylist);
+                keywords.push_back(std::to_string(_seqIdxQueue.front()));
+                keywords.push_back(std::to_string(_seqIdxQueue.front()));
+                keywords.push_back("false");
+                _seqIdxQueue.erase(_seqIdxQueue.begin());
+                CommandManager::INSTANCE.run("Insert Playlist Immediate",keywords);
+            }
+        }
+        _lastItem = item;
         LogInfo(VB_PLUGIN, "%s\n", settings["Start"].c_str());
         LogInfo(VB_PLUGIN, "%s\n", action.c_str());
     }
@@ -129,11 +145,11 @@ public:
         }
     }  
 
-    void AddSeqToQueue(std::string const& fseq, bool duplicate) {
-        if (std::count(_fseqQueue.begin(), _fseqQueue.end(), fseq) && !duplicate) {
+    void AddSeqToQueue(int index, bool duplicate) {
+        if (std::count(_seqIdxQueue.begin(), _seqIdxQueue.end(), index) && !duplicate) {
             return;
         }
-        _fseqQueue.push_back(fseq);
+        _seqIdxQueue.push_back(index);
     }
     virtual const std::shared_ptr<httpserver::http_response> render_GET(const httpserver::http_request &req) override {
         
@@ -141,8 +157,8 @@ public:
             std::string p1 = req.get_path_pieces()[1];
             if (p1 == "list") {
                 std::string v;
-                for (auto &sd : _fseqQueue) {
-                    v += sd + "\n";
+                for (auto sd : _seqIdxQueue) {
+                    v += std::to_string(sd) + "\n";
                 }
                 return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(v, 200));
             } else if (p1 == "play") {
