@@ -13,6 +13,12 @@
 
 $menuEntries = Array(
 	Array(
+		'text' => 'Button Queue - Configuration',
+		'type' => 'output',
+		'page' => 'plugin_setup.php',
+		'wrap' => 1
+	),
+	Array(
 		'text' => 'Button Queue - About',
 		'type' => 'help',
 		'page' => 'about.php',

@@ -33,7 +33,7 @@ $pluginJson = convertAndGetSettings();
 
 <script>
 
-var tplinkConfig = <? echo json_encode($pluginJson, JSON_PRETTY_PRINT); ?>;
+var buttonQueueConfig = <? echo json_encode($pluginJson, JSON_PRETTY_PRINT); ?>;
 
 
 function RefreshLastMessages() {
@@ -50,17 +50,54 @@ function RefreshPlaylist() {
     );
 }
 
-</script>
-</div>
+function getPlaylists() {
+    $.get('/api/playlists', function (data) {
+    var playlistOptions = '';
+    data.forEach(playlist => {
+      if(playlist === buttonQueueConfig["playlist"]) {
+        playlistOptions += '<option selected value="' + playlist + '">' + playlist + '</option>';
+      }else {
+        playlistOptions += '<option value="' + playlist + '">' + playlist + '</option>';
+      }
+    });
+    $('#remotePlaylistSelect').html(playlistOptions);
+  })
+}
 
-</div>
-<div>
-<p>
+function SaveButtonQueue() {
+    newserialeventConfig = { "playlist": ''};
+    newserialeventConfig["playlist"] = document.getElementById("remotePlaylistSelect").value;
+
+    var data = JSON.stringify(newserialeventConfig);
+    $.ajax({
+        type: "POST",
+	url: 'api/configfile/plugin.buttonqueue.json',
+        dataType: 'json',
+        async: false,
+        data: data,
+        processData: false,
+        contentType: 'application/json',
+        success: function (data) {
+           SetRestartFlag(2);
+        }
+    });
+}
+
+
+$(document).ready(function() {
+    getPlaylists();
+              });
+</script>
+
 <div class="col-auto">
         <div>
+            <div class="input-group">
+                <select class="form-control" id="remotePlaylistSelect" name="remotePlaylistSelect"></select>
+                <input type="button" value="Save" class="buttons genericButton" onclick="SaveButtonQueue();">
+            </div>
             <div class="row">
                 <div class="col">
-                    Last Messages:&nbsp;<input type="button" value="Get Playlist" class="buttons" onclick="RefreshPlaylist();">
+                    Using Playlist:&nbsp;<input type="button" value="Get Playlist" class="buttons" onclick="RefreshPlaylist();">
                 </div>
             </div>
             <div class="row">
@@ -70,7 +107,7 @@ function RefreshPlaylist() {
             </div>
             <div class="row">
                 <div class="col">
-                    Last Messages:&nbsp;<input type="button" value="Refresh" class="buttons" onclick="RefreshLastMessages();">
+                    Current Indexes:&nbsp;<input type="button" value="Refresh" class="buttons" onclick="RefreshLastMessages();">
                 </div>
             </div>
             <div class="row">

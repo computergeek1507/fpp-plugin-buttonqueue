@@ -54,7 +54,7 @@ private:
 public:
     ButtonQueuePlugin() : FPPPlugin("fpp-plugin-ButtonQueue") {
         LogInfo(VB_PLUGIN, "Initializing ButtonQueue Plugin\n");
-        //readFiles();
+        readFiles();
         registerCommand();
     }
     virtual ~ButtonQueuePlugin() {
@@ -131,17 +131,17 @@ public:
     void readFiles()
     {
         try {
-            std::string configLocation = FPP_DIR_CONFIG("/plugin.ButtonQueue.json");
+            std::string configLocation = FPP_DIR_CONFIG("/plugin.buttonqueue.json");
             if (FileExists(configLocation)) {
                 Json::Value root;
                 if (LoadJsonFromFile(configLocation, root)) {
                     _queuePlaylist = root["playlist"].asString();
                 }
             }else{
-                LogErr(VB_PLUGIN, "plugin.ButtonQueue.json not found\n");
+                LogErr(VB_PLUGIN, "plugin.buttonqueue.json not found\n");
             }
         } catch (...) {
-            LogErr(VB_PLUGIN, "reading plugin.ButtonQueue.json threw\n");
+            LogErr(VB_PLUGIN, "reading plugin.buttonqueue.json threw\n");
         }
     }  
 
