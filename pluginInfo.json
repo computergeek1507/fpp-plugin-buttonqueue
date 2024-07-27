@@ -2,19 +2,25 @@
 	"repoName": "fpp-plugin-buttonqueue",
 	"name": "button queue Plugin for FPP",
 	"author": "Scott Hanson (computergeek1507)",
-	"description": "This plugin allows channel data to be sent to a TP-Link bulbs. Supports Commands to turn on/off plugs and bulbs.",
+	"description": "button queue.",
 	"homeURL": "https://github.com/computergeek1507/fpp-plugin-buttonqueue",
 	"srcURL": "https://github.com/computergeek1507/fpp-plugin-buttonqueue.git",
 	"bugURL": "https://github.com/computergeek1507/fpp-plugin-buttonqueue/issues",
 	"allowUpdates": 1,
 	"versions": [
 		{
-			"minFPPVersion": "5.0",
-			"maxFPPVersion": "0",
+			"minFPPVersion": "7.0",
+			"maxFPPVersion": "7.99",
 			"branch": "main",
 			"sha": "",
-			"dependencies": {
-			}
+			"allowUpdates": 1
+		},
+		{
+			"minFPPVersion": "7.0",
+			"maxFPPVersion": "7.99",
+			"branch": "main",
+			"sha": "",
+			"allowUpdates": 1
 		}
 	]
 }
