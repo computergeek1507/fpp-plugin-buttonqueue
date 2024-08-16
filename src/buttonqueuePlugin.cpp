@@ -151,7 +151,7 @@ public:
         }
         _seqIdxQueue.push_back(index);
     }
-    virtual const std::shared_ptr<httpserver::http_response> render_GET(const httpserver::http_request &req) override {
+    virtual HTTP_RESPONSE_CONST std::shared_ptr<httpserver::http_response> render_GET(const httpserver::http_request &req) override {
         
         if (req.get_path_pieces().size() > 1) {
             std::string p1 = req.get_path_pieces()[1];
