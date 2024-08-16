@@ -102,26 +102,34 @@ public:
     }
 
     virtual void playlistCallback(const Json::Value &playlist, const std::string &action, const std::string &section, int item) {
-        if (settings["Start"] == "PlaylistStart" && action == "start") {
+        //if (settings["Start"] == "PlaylistStart" && action == "start") {
             //EnableButtonQueueItems();
-        }
-        _currentPlaylist = playlist["name"].asString();
-        _currentAction = action;
-        if(!_seqIdxQueue.empty()) {
-            if(_lastItem != item && _currentPlaylist != _queuePlaylist) {
-               // $url = "http://127.0.0.1/api/command/Insert%20Playlist%20Immediate/" . $remotePlaylistEncoded . "/" . $index . "/" . $index;
-                std::vector<std::string> keywords;
-                keywords.push_back(_queuePlaylist);
-                keywords.push_back(std::to_string(_seqIdxQueue.front()));
-                keywords.push_back(std::to_string(_seqIdxQueue.front()));
-                keywords.push_back("false");
-                _seqIdxQueue.erase(_seqIdxQueue.begin());
-                CommandManager::INSTANCE.run("Insert Playlist Immediate",keywords);
+        //}
+        //if (action == "playing" || action == "start") 
+        {
+            _currentPlaylist = playlist["name"].asString();
+            _currentAction = action;
+            LogInfo(VB_PLUGIN, "currentPlaylist '%s'\n", _currentPlaylist.c_str());
+            LogInfo(VB_PLUGIN, "action '%s'\n", action.c_str());
+
+            if(!_seqIdxQueue.empty()) {
+                if( _currentPlaylist != _queuePlaylist && !_currentPlaylist.empty()) {
+                    LogInfo(VB_PLUGIN, "insert queuePlaylist '%s'\n", _queuePlaylist.c_str());
+                    LogInfo(VB_PLUGIN, "insert idx '%i'\n", _seqIdxQueue.front());
+                // $url = "http://127.0.0.1/api/command/Insert%20Playlist%20Immediate/" . $remotePlaylistEncoded . "/" . $index . "/" . $index;
+                    std::vector<std::string> keywords;
+                    keywords.push_back(_queuePlaylist);
+                    keywords.push_back(std::to_string(_seqIdxQueue.front()));
+                    keywords.push_back(std::to_string(_seqIdxQueue.front()));
+                     keywords.push_back("false");
+                    _seqIdxQueue.erase(_seqIdxQueue.begin());
+                    CommandManager::INSTANCE.run("Insert Playlist Immediate",keywords);
+                }
+            }else{
+                LogInfo(VB_PLUGIN, "queue is empty\n");
             }
+            _lastItem = item;
         }
-        _lastItem = item;
-        LogInfo(VB_PLUGIN, "%s\n", settings["Start"].c_str());
-        LogInfo(VB_PLUGIN, "%s\n", action.c_str());
     }
 
     void sendChannelData(unsigned char *data) {
@@ -136,6 +144,7 @@ public:
                 Json::Value root;
                 if (LoadJsonFromFile(configLocation, root)) {
                     _queuePlaylist = root["playlist"].asString();
+                    LogInfo(VB_PLUGIN, "ButtonQueue Plugin Playlist %s\n", _queuePlaylist.c_str());
                 }
             }else{
                 LogErr(VB_PLUGIN, "plugin.buttonqueue.json not found\n");
