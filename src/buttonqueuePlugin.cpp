@@ -49,6 +49,9 @@ private:
     std::string _queuePlaylist;
     std::string _currentPlaylist;
     int _lastItem {-1};
+    int _lastItem2 {-1};
+    //bool _addStop {false};
+    //bool _added {false};
     //Json::Value config;
 
 public:
@@ -67,8 +70,8 @@ public:
     class ButtonQueueAddSequenceCommand : public Command {
     public:
         ButtonQueueAddSequenceCommand(ButtonQueuePlugin *p) : Command("ButtonQueue Add Sequence"), plugin(p) {
-            args.push_back(CommandArg("index", "int", "seq index").setDefaultValue("0"));
-            args.push_back(CommandArg("duplicate", "bool", "Allow Duplicate Sequence").setRange(0, 255).setDefaultValue("false"));
+            args.push_back(CommandArg("index", "int", "Seq Index In Playlist(1 based)").setRange(1, 255).setDefaultValue("1"));
+            args.push_back(CommandArg("duplicate", "bool", "Allow Duplicate Sequence").setDefaultValue("false"));
         }
         
         virtual std::unique_ptr<Command::Result> run(const std::vector<std::string> &args) override {
@@ -78,7 +81,7 @@ public:
                 seq_index = std::stoi(args[0]);
             }
             if (args.size() >= 2) {
-                duplicate = args[1]=="true";
+                duplicate = args[1] == "true";
             }
             plugin->AddSeqToQueue(seq_index, duplicate);
             return std::make_unique<Command::Result>("ButtonQueue Add Sequence");
@@ -105,7 +108,7 @@ public:
         //if (settings["Start"] == "PlaylistStart" && action == "start") {
             //EnableButtonQueueItems();
         //}
-        //if (action == "playing" || action == "start") 
+        //if (action == "query_next" || action == "start" || action == "playing") 
         {
             _currentPlaylist = playlist["name"].asString();
             _currentAction = action;
@@ -113,7 +116,7 @@ public:
             LogInfo(VB_PLUGIN, "action '%s'\n", action.c_str());
 
             if(!_seqIdxQueue.empty()) {
-                if( _currentPlaylist != _queuePlaylist && !_currentPlaylist.empty()) {
+                if( (_currentPlaylist != _queuePlaylist && !_currentPlaylist.empty())) {
                     LogInfo(VB_PLUGIN, "insert queuePlaylist '%s'\n", _queuePlaylist.c_str());
                     LogInfo(VB_PLUGIN, "insert idx '%i'\n", _seqIdxQueue.front());
                 // $url = "http://127.0.0.1/api/command/Insert%20Playlist%20Immediate/" . $remotePlaylistEncoded . "/" . $index . "/" . $index;
@@ -121,12 +124,18 @@ public:
                     keywords.push_back(_queuePlaylist);
                     keywords.push_back(std::to_string(_seqIdxQueue.front()));
                     keywords.push_back(std::to_string(_seqIdxQueue.front()));
-                     keywords.push_back("false");
+                    keywords.push_back("true");
+                    _lastItem2 =_seqIdxQueue.front();
                     _seqIdxQueue.erase(_seqIdxQueue.begin());
                     CommandManager::INSTANCE.run("Insert Playlist Immediate",keywords);
+                    //_addStop = false;
                 }
+                
+                
             }else{
                 LogInfo(VB_PLUGIN, "queue is empty\n");
+                //_addStop = false;
+                //_lastItem2 = -1;
             }
             _lastItem = item;
         }
@@ -158,7 +167,12 @@ public:
         if (std::count(_seqIdxQueue.begin(), _seqIdxQueue.end(), index) && !duplicate) {
             return;
         }
+        if (_currentPlaylist == _queuePlaylist && _lastItem2 == index /*&& !duplicate*/) {
+            return;
+        }
+        auto sizeOfQueue = _seqIdxQueue.size();
         _seqIdxQueue.push_back(index);
+        
     }
     virtual HTTP_RESPONSE_CONST std::shared_ptr<httpserver::http_response> render_GET(const httpserver::http_request &req) override {
         
@@ -167,7 +181,7 @@ public:
             if (p1 == "list") {
                 std::string v;
                 for (auto sd : _seqIdxQueue) {
-                    v += std::to_string(sd) + "\n";
+                    v += std::to_string(sd) + ",";
                 }
                 return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(v, 200));
             } else if (p1 == "play") {
