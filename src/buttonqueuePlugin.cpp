@@ -89,8 +89,22 @@ public:
         ButtonQueuePlugin *plugin;
     };
 
+    class ButtonQueueClearQueueCommand : public Command {
+    public:
+        ButtonQueueClearQueueCommand(ButtonQueuePlugin *p) : Command("ButtonQueue Clear Queue"), plugin(p) {
+        }
+        
+        virtual std::unique_ptr<Command::Result> run(const std::vector<std::string> &args) override {
+            plugin->ClearQueue();
+            return std::make_unique<Command::Result>("ButtonQueue Clear Queue");
+        }
+        ButtonQueuePlugin *plugin;
+    };
+
+
     void registerCommand() {
         CommandManager::INSTANCE.addCommand(new ButtonQueueAddSequenceCommand(this));
+        CommandManager::INSTANCE.addCommand(new ButtonQueueClearQueueCommand(this));
     }
 
     virtual void modifySequenceData(int ms, uint8_t *seqData) override {
@@ -173,6 +187,10 @@ public:
         auto sizeOfQueue = _seqIdxQueue.size();
         _seqIdxQueue.push_back(index);
         
+    }
+
+    void ClearQueue() {
+        _seqIdxQueue.clear();
     }
     virtual HTTP_RESPONSE_CONST std::shared_ptr<httpserver::http_response> render_GET(const httpserver::http_request &req) override {
         
