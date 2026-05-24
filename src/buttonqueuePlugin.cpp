@@ -1,4 +1,4 @@
-#include "fpp-pch.h"
+#include <fpp-pch.h>
 
 #include <fstream>
 #include <sstream>
@@ -21,7 +21,7 @@
 #include <thread>
 #include <cmath>
 
-#include <httpserver.hpp>
+#include <drogon/HttpAppFramework.h>
 #include "common.h"
 #include "settings.h"
 #include "Plugin.h"
@@ -41,7 +41,7 @@
 
 //#include "ButtonQueueItem.h"
 
-class ButtonQueuePlugin : public FPPPlugin, public httpserver::http_resource {
+class ButtonQueuePlugin : public FPPPlugin {
 private:
     std::vector<int> _seqIdxQueue;
     std::string _currentFSEQ;
@@ -192,24 +192,27 @@ public:
     void ClearQueue() {
         _seqIdxQueue.clear();
     }
-    virtual HTTP_RESPONSE_CONST std::shared_ptr<httpserver::http_response> render_GET(const httpserver::http_request &req) override {
-        
-        if (req.get_path_pieces().size() > 1) {
-            std::string p1 = req.get_path_pieces()[1];
-            if (p1 == "list") {
-                std::string v;
-                for (auto sd : _seqIdxQueue) {
-                    v += std::to_string(sd) + ",";
+    virtual void registerApis() override {
+        auto handler = [this](const HttpRequestPtr& req, HttpCallback&& callback) {
+            auto pieces = getPathPieces(req->path());
+            if (pieces.size() > 1) {
+                std::string p1 = pieces[1];
+                if (p1 == "list") {
+                    std::string v;
+                    for (auto sd : _seqIdxQueue) {
+                        v += std::to_string(sd) + ",";
+                    }
+                    callback(makeStringResponse(v, 200));
+                    return;
+                } else if (p1 == "play") {
+                    callback(makeStringResponse(_queuePlaylist, 200));
+                    return;
                 }
-                return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(v, 200));
-            } else if (p1 == "play") {
-                return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(_queuePlaylist, 200));
-            } 
-        }
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Not Found", 404));
-    }
-    void registerApis(httpserver::webserver *m_ws) override {
-        m_ws->register_resource("/BUTTONQUEUE", this, true);
+            }
+            callback(makeStringResponse("Not Found", 404));
+        };
+        drogon::app().registerHandler("/BUTTONQUEUE", handler, {drogon::Get});
+        drogon::app().registerHandlerViaRegex("/BUTTONQUEUE/.*", handler, {drogon::Get});
     }
 
 };
