@@ -5,6 +5,7 @@
 	"description": "button queue.",
 	"homeURL": "https://github.com/computergeek1507/fpp-plugin-buttonqueue",
 	"srcURL": "https://github.com/computergeek1507/fpp-plugin-buttonqueue.git",
+	"iconURL": "https://raw.githubusercontent.com/computergeek1507/fpp-plugin-buttonqueue/main/icon.png",
 	"bugURL": "https://github.com/computergeek1507/fpp-plugin-buttonqueue/issues",
 	"allowUpdates": 1,
 	"versions": [
