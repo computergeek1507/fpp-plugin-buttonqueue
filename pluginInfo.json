@@ -2,7 +2,7 @@
 	"repoName": "fpp-plugin-buttonqueue",
 	"name": "button queue Plugin for FPP",
 	"author": "Scott Hanson (computergeek1507)",
-	"description": "Create a "queue" that seguences can be added to by button or command that can be played immediately or after current sequnce ends.",
+	"description": "Create a \"queue\" that seguences can be added to by button or command that can be played immediately or after current sequnce ends.",
 	"homeURL": "https://github.com/computergeek1507/fpp-plugin-buttonqueue",
 	"srcURL": "https://github.com/computergeek1507/fpp-plugin-buttonqueue.git",
 	"iconURL": "https://raw.githubusercontent.com/computergeek1507/fpp-plugin-buttonqueue/main/icon.png",
