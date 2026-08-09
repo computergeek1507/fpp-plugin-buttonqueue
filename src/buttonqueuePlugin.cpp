@@ -26,6 +26,7 @@
 #include "settings.h"
 #include "Plugin.h"
 #include "Plugins.h"
+#include "fpphttp.h"
 #include "log.h"
 #include "MultiSync.h"
 
@@ -53,6 +54,8 @@ private:
     //bool _addStop {false};
     //bool _added {false};
     //Json::Value config;
+    Command *_addSeqCommand {nullptr};
+    Command *_clearQueueCommand {nullptr};
 
 public:
     ButtonQueuePlugin() : FPPPlugin("fpp-plugin-ButtonQueue") {
@@ -103,8 +106,24 @@ public:
 
 
     void registerCommand() {
-        CommandManager::INSTANCE.addCommand(new ButtonQueueAddSequenceCommand(this));
-        CommandManager::INSTANCE.addCommand(new ButtonQueueClearQueueCommand(this));
+        _addSeqCommand = new ButtonQueueAddSequenceCommand(this);
+        _clearQueueCommand = new ButtonQueueClearQueueCommand(this);
+        CommandManager::INSTANCE.addCommand(_addSeqCommand);
+        CommandManager::INSTANCE.addCommand(_clearQueueCommand);
+    }
+
+    virtual std::function<bool()> shutdown() override {
+        if (_addSeqCommand) {
+            CommandManager::INSTANCE.removeCommand(_addSeqCommand);
+            delete _addSeqCommand;
+            _addSeqCommand = nullptr;
+        }
+        if (_clearQueueCommand) {
+            CommandManager::INSTANCE.removeCommand(_clearQueueCommand);
+            delete _clearQueueCommand;
+            _clearQueueCommand = nullptr;
+        }
+        return nullptr;
     }
 
     virtual void modifySequenceData(int ms, uint8_t *seqData) override {
@@ -211,8 +230,11 @@ public:
             }
             callback(makeStringResponse("Not Found", 404));
         };
-        drogon::app().registerHandler("/BUTTONQUEUE", handler, {drogon::Get});
-        drogon::app().registerHandlerViaRegex("/BUTTONQUEUE/.*", handler, {drogon::Get});
+        FPPPlugins::registerPluginApi("/BUTTONQUEUE", handler, {drogon::Get}, true);
+    }
+
+    virtual void unregisterApis() override {
+        FPPPlugins::unregisterPluginApi("/BUTTONQUEUE");
     }
 
 };
